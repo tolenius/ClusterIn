@@ -8,7 +8,7 @@ This repository contains the ClusterIn plugin, input files for an example cluste
 
 If you use the codes provided in this repository in any study, please cite the following paper:
 
-* Olenius and Roldin: Role of gas–molecular cluster–aerosol dynamics in atmospheric new-particle formation, Sci. Rep. 12, 10135 (2022), DOI:10.1038/s41598-022-14525-y
+* Olenius and Roldin: Role of gas–molecular cluster–aerosol dynamics in atmospheric new-particle formation, *Sci. Rep.* 12, 10135 (2022), DOI:10.1038/s41598-022-14525-y
 
 ## License
 
