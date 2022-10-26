@@ -13,11 +13,19 @@ vapors=("A" "N")
 # Include charged clusters
 l_incl_ions=1
 
+# Fixed T and RH values - comment out when using varying input T
+# (RH works only together with fixed T)
+#temperature=280
+#rh=20
+
 
 #### Options for dynamics and coupling of cluster dynamics to an aerosol dynamics model ####
 
 # Full dynamic coupling including aerosol evaporation, cluster scavenging mass transfer and size-classified J
 l_full_dynamic=1
+# Faster compilation: Vapor concentrations always forced constant - use carefully!
+# Constant concentrations can also be set within ACDC when l_const_vapor=0, but compilation may be slow for complex systems
+l_const_vapor=0
 
 
 #### Additional options for generating the cluster equations by the Perl code - comment out if not used ####
@@ -32,6 +40,9 @@ perl_opt_add+=" --tag test"
 file_suffix="_test"
 # Include also the vapor names in the suffix
 l_add_vapor_suffix=1
+
+# Suffix to add to the subroutine names within the files
+#routine_suffix="_test"
 
 
 #### Paths and names of the Perl input files ####
@@ -58,6 +69,9 @@ perl_file="acdc_2021_09_28.pl"
 ######## Determine the Perl input and create the cluster system files ########
 
 
+[ $l_full_dynamic -eq 1 ] && l_const_vapor=0
+[ $l_const_vapor -eq 1 ] && echo "Warning: Vapor concentrations always forced constant - this cannot be changed anymore in ACDC"
+
 # Create the Perl option string
 
 perl_opt=" --fortran --e $data_dir/$g_file"
@@ -67,12 +81,24 @@ perl_opt=" --fortran --e $data_dir/$g_file"
 cluster_file="input_"
 vapor_suffix="_"
 
-perl_opt+=" --variable_temp"
+if [ -n "$temperature" ]; then
+    perl_opt+=" --temperature $temperature"
+else
+    perl_opt+=" --variable_temp"
+fi
+
+if [ -n "$rh" ]; then
+    perl_opt+=" --rh $rh"
+fi
 
 for vapor in "${vapors[@]}"; do
+
     perl_opt+=" --cs_only 1$vapor,0"
+    [ $l_const_vapor -eq 1 ] && perl_opt+=" --no_eq 1$vapor"
+    
     cluster_file+="$vapor"
     vapor_suffix+="$vapor"
+    
 done
 
 cluster_file+="_neutral"
@@ -80,6 +106,9 @@ cluster_file+="_neutral"
 if [ $l_incl_ions -eq 1 ]; then
     perl_opt+=" --variable_ion_source --dip $data_dir/$dip_file"
     cluster_file+="_neg_pos"
+    vapor_suffix+="_ions"
+else
+    vapor_suffix+="_noions"
 fi
 
 [ -n "$inp_suffix" ] && cluster_file+="$inp_suffix"
@@ -109,6 +138,10 @@ fi
 
 [ -n "$perl_opt_add" ] && perl_opt+=" $perl_opt_add"
 
+# Examples of alternative / additional options
+# --scale_evap_factor -1.0
+# --wl CLOUD4_simple
+
 ###############################################################################
 
 # Add possible suffices to the output files
@@ -117,6 +150,9 @@ suffix_tmp=""
 [ $l_add_vapor_suffix -eq 1 ] && suffix_tmp+="$vapor_suffix"
 [ -n "$file_suffix" ] && suffix_tmp+="$file_suffix"
 [ "$suffix_tmp" != "" ] && perl_opt+=" --append $suffix_tmp"
+
+# Add potential suffices to the subroutine names
+[ -n "$routine_suffix" ] && perl_opt+=" --append_to_subroutines $routine_suffix"
 
 ###############################################################################
 
@@ -128,3 +164,5 @@ perl $( echo "$perl_file $perl_opt" )
 
 ###############################################################################
 
+# Print also a file containing info on the vapor species
+printf '%s\n' "${#vapors[@]}" "${vapors[@]}" > "cluster_chem_spec${file_suffix}.txt"

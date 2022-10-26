@@ -1,0 +1,64 @@
+FC = gfortran
+FCFLAGS = -O3 -fcheck=bounds -finit-local-zero
+#FCFLAGS = -O3 -fcheck=bounds -finit-local-zero -mcmodel=medium -pg
+
+
+# Names of some cluster files (in case one wants to test different versions with different names)
+# Note: some files don't include the file name extension .f90 in order to easily include a number suffix
+run_sim = run_clusterin_example_nchem.f90
+clust_sim = clusterin
+driver = driver_acdc_J
+eqs = acdc_equations
+sys = acdc_system
+
+
+# Numbers of separate cluster systems, if more than one system with numbered files are used
+CLUSTER_CHEM_NUM = 1 2
+
+# Directories to search files in (in addition to the current one)
+VPATH = $(addprefix cluster_chem_, $(CLUSTER_CHEM_NUM))
+
+CLUSTER_CHEM_OBJECTS = $(CLUSTER_CHEM_NUM:%=acdc_equations_%.o) $(CLUSTER_CHEM_NUM:%=acdc_system_%.o) \
+    $(CLUSTER_CHEM_NUM:%=clusterin_%.o) $(CLUSTER_CHEM_NUM:%=driver_%.o) $(CLUSTER_CHEM_NUM:%=acdc_simulation_setup_%.o)
+
+
+# Executable
+run: run_clusterin.o $(CLUSTER_CHEM_OBJECTS) solution_settings.o dvode.o acdc_aerosol_parameters.o
+	$(FC) $(FCFLAGS) $^ -o $@
+
+
+# Main program
+run_clusterin.o: $(run_sim) $(CLUSTER_CHEM_OBJECTS) acdc_aerosol_parameters.o
+	$(FC) $(FCFLAGS) -c $< -o $@
+    
+# Files specific for a given cluster system (i.e. numbered files for separate cluster systems)
+clusterin_%.o: $(clust_sim)_%.f90 driver_%.o acdc_system_%.o acdc_simulation_setup_%.o
+	$(FC) $(FCFLAGS) -c $< -o $@
+
+driver_%.o: $(driver)_%.f90 acdc_system_%.o acdc_simulation_setup_%.o solution_settings.o
+	$(FC) $(FCFLAGS) -c $< -o $@
+
+acdc_equations_%.o: $(eqs)_%.f90 acdc_simulation_setup_%.o
+	$(FC) $(FCFLAGS) -c $< -o $@
+
+acdc_system_%.o: $(sys)_%.f90
+	$(FC) $(FCFLAGS) -c $< -o $@
+
+acdc_simulation_setup_%.o: acdc_simulation_setup_%.f90 acdc_system_%.o acdc_aerosol_parameters.o
+	$(FC) $(FCFLAGS) -c $< -o $@
+
+# Common files for all cluster systems
+acdc_aerosol_parameters.o: acdc_aerosol_parameters.f90
+	$(FC) $(FCFLAGS) -c $< -o $@
+
+solution_settings.o: solvers/solution_settings.f90
+	$(FC) $(FCFLAGS) -c $< -o $@
+    
+dvode.o: solvers/dvode.f
+	$(FC) $(FCFLAGS) -std=legacy -c $< -o $@
+
+
+.PHONY: clean
+
+clean:
+	rm -f *.o *.mod run

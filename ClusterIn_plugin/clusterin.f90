@@ -354,7 +354,8 @@ use driver_acdc_J, only : acdc_driver, use_solver                               
         if (present(c_out_all)) c_out_all = c_out_clust
         
         if (present(clust_out_molec)) then
-            call get_jbin_parameters(c_out_clust,c_out_bin,comp_out_bin,nmols_nocharge_out=clust_out_molec,names_vapor=names_vapor)
+            call get_jbin_parameters(c_out_clust,c_out_bin,comp_out_bin,nmols_nocharge_out=clust_out_molec,&
+            &    names_vapor=names_vapor)
         else
             call get_jbin_parameters(c_out_clust,c_out_bin,comp_out_bin,names_vapor=names_vapor)
         end if
