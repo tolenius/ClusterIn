@@ -57,7 +57,7 @@ dip_file="dipoles_YesQuasiHCorr_Besel.txt"
 # if inp_suffix is not used, comment out
 inp_suffix="_Besel"
 
-perl_file="acdc_2021_09_28.pl"
+perl_file="acdc_2022_11_24.pl"
 
 
 # End of the input section
@@ -129,7 +129,7 @@ if [ $l_full_dynamic -eq 1 ]; then
     perl_opt+=" --cs external --save_coag_per_clust --save_outgoing_clust"
 else
     # Approximate the size-dependent cluster scavenging sink by an exponent form based on the H2SO4 sink
-    perl_opt+=" --variable_cs --cs exp_loss --exp_loss_exponent -1.6 --save_outgoing"
+    perl_opt+=" --variable_cs --cs exp_loss --exp_loss_exponent -1.6 --exp_loss_ref_size 0.55 --save_outgoing"
 fi
 
 ###############################################################################
