@@ -10,18 +10,18 @@ implicit none
     !real(kind(1.d0)), parameter :: rtol_solver = 1.d-3    ! 1.d-3 is the default tolerance e.g. in Matlab
     
     ! Settings for a solver
-    real(kind(1.d0)), parameter :: atol_solver = 1.d-20    ! Absolute tolerance in the solver
+    real(kind(1.d0)), parameter :: atol_solver = 1.d-6     ! Absolute tolerance in the solver
     
     ! Settings for Euler integration
     real(kind(1.d0)), parameter :: chmax = 1.d-2           ! Threshold relative change in the concentration for
                                                            ! determining if the time step should be decreased
-    real(kind(1.d0)), parameter :: chtol = 1.d-20          ! Lowest conc. (m^-3) to consider when comparing the changes
+    real(kind(1.d0)), parameter :: chtol = 1.d-6           ! Lowest conc. (m^-3) to consider when comparing the changes
     
     ! Lowest negative concentration accepted
-    real(kind(1.d0)), parameter :: negtol = -1.d-20        ! (m^-3)
+    real(kind(1.d0)), parameter :: negtol = -1.d-6         ! (m^-3)
     
     ! Criteria for monitoring the convergence to a steady state
-    real(kind(1.d0)), parameter :: sstol = 1.d-5           ! Maximum relative change in the concentrations
+    real(kind(1.d0)), parameter :: sstol = 1.d-3           ! Maximum relative change in the concentrations
     real(kind(1.d0)), parameter :: sstime_res = 6.d2       ! Minimum time interval for checking the changes (s)
     !real(kind(1.d0)), parameter :: sstime_res = 60.d0
     real(kind(1.d0)), parameter :: sstime_tot = 1.2d3      ! Minimum total simulation time required for a steady state (s)
