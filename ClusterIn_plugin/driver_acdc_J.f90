@@ -410,7 +410,14 @@ subroutine acdc_driver(neqn,nclust,nout_all,c,cs_ref,temperature,ipr,t_sim,t_tot
             end do
             j_out(1) = j_out(1)+j_by_charge(4)                  ! Recombination products
         else
-            call formation(neqn,c,j_out,ipar,parameters)
+            !call formation(neqn,c,j_out,ipar,parameters)
+            ! The subroutine arguments depend on the mode; this is not ideal but it worked with previous compiler versions,
+            ! now a quick fix would be e.g. to add the flag for the driver file: -fallow-argument-mismatch
+            ! (Interfaces don't seem to work easily; would be best to have fixed subroutine arguments)
+            write(*,*) "If you are using the loop mode, do one of the following:"
+            write(*,*) "- Test simply uncommenting the call to formation and see whether your compiler accepts it; otherwise:"
+            write(*,*) "- Comment out the call to formation in the small set mode, or add gfortran flag -fallow-argument-mismatch"
+            stop
         end if
     else
         ! Fixed time step: clusters grown out of the system per integrated time
